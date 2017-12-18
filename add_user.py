@@ -48,7 +48,9 @@ while(True):
     
     for i,d in enumerate(dets):
         Num_img += 1
-        cv2.imwrite(folderPath + "/User." + Id + "." + str(Num_img) + ".jpg",
+        cv2.imwrite(folderPath + "/User." + stud_no + "." + str(Num_img) + ".jpg",
+                    img)
+        cv2.imwrite(folderPath + "/1User." + stud_no + "." + str(Num_img) + ".jpg",
                     img[d.top():d.bottom(),d.left():d.right()])
         cv2.rectangle(img,(d.left(),d.top()),(d.right(),d.bottom()),(0,255,0),2)
         cv2.waitKey(200)
@@ -60,7 +62,7 @@ cap.release()
 cv2.destroyAllWindows()
 
 path_database = os.path.join(os.getcwd(),"database/")
-file_name_csv= path+"stud_info_"+Dept+"_"+Batch+".csv"
+file_name_csv= path_database+"stud_info_"+Dept+"_"+Batch+".csv"
 
 if not os.path.exists(file_name_csv):
     with open(file_name_csv,'w',newline='') as csvfile:
