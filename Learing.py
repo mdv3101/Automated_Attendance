@@ -14,17 +14,24 @@ path = 'D:/DataScience/Attendance/'
 opencv_path = "C:/opencv/build/etc/lbpcascades/"
 detector = dlib.get_frontal_face_detector()
 
-def detect_face(img):
+def draw_rectangle(img, rect):
+    (x, y, w, h) = rect
+    cv2.rectangle(img, (x,y), (w,h), (0, 255, 0), 2)
     
+def draw_text(img, text, x, y):
+    cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
+
+def count_face(img):
     dets = detector(img,1)
-    
+    return (len(dets))
+
+def detect_face(img):
+    dets = detector(img,1)
     for i,d in enumerate(dets):
-        print(i)
-        print(d)
+        #print(i)
         face= img[d.top():d.bottom(),d.left():d.right()]
         top,bot,left,rgt = d.top(),d.bottom(),d.left(),d.right()
         rect1 = left,bot,rgt,top
-
         #rect1 = d.top(),d.bottom(),d.left(),d.right()
         if (len(face) == 0):
             print ("Unable to detect image")
@@ -58,10 +65,17 @@ def prepare_learning_data(dept_name,batch):
             cv2.imshow("Training on image...", image)
             cv2.waitKey(100)
             cv2.destroyAllWindows()
-            print(image_name)
-            face,rect = detect_face(image)
-            if face is None:
-                print ("Invalid Image in prep")
+            #print(image_name)
+            no_of_face_test = count_face(image)
+            #print(no_of_face_test) 
+            if no_of_face_test ==0:
+                print ("Unable to detect image")
+                print(image_name)
+                face = None
+            else:
+                face,rect = detect_face(image)
+            #if face is None:
+            #   print ("Invalid Image in prep")
             if face is not None:
                 faces.append(face)
                 labels.append(label)
@@ -79,42 +93,44 @@ print("Total labels: ", len(labels))
 face_recognizer = cv2.face.createLBPHFaceRecognizer()
 face_recognizer.train(faces, np.array(labels))
 
-def draw_rectangle(img, rect):
-    (x, y, w, h) = rect
-    cv2.rectangle(img, (x,y), (w,h), (0, 255, 0), 2)
-    
-def draw_text(img, text, x, y):
-    cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 255, 0), 2)
+
     
 def predict(test_img):
     img = test_img.copy()
-    face, rect= detect_face(img)
-    #top,bot,left,rgt=rect
-    if img is None:
-        print ("Invalid Image")
+    no_of_face_test = count_face(img)
+    #print(no_of_face_test)
+    
+    if no_of_face_test ==0:
+        print ("Unable to detect image")
         return 0
-    
-    label= face_recognizer.predict(face)
-    label2 = str(label[0])
-    #dlib.rectangle(left,top,rgt,bot)
-    draw_rectangle(img, rect)
-    
-    draw_text(img, label2, rect[2]-50, rect[3]-10)
+    for i in range(0,no_of_face_test):
+        face, rect= detect_face(img)
+        #print (face)
+        #top,bot,left,rgt=rect
+        if img is None:
+            print ("Invalid Image")
+            return 0
+        if face is None:
+            print ("Unable to detect image")
+            return 0
+        label= face_recognizer.predict(face)
+        label2 = str(label[0])
+        print(label)
+        #dlib.rectangle(left,top,rgt,bot)
+        draw_rectangle(img, rect)
+        draw_text(img, label2, rect[2]-50, rect[3]-10)
     return img
     
-test_img1 = cv2.imread(path+ "test-data/test1.jpg")
+test_img1 = cv2.imread(path+ "test-data/test15.jpg")
 
 if test_img1 is not None:
     predicted_img1 = predict(test_img1)
-    
     print("Prediction complete")
-    
-    cv2.namedWindow('Test_output',cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('Test_output', 600,600)
-    cv2.imshow("Test_output", predicted_img1)
-
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
+    if str(type(predicted_img1)) != "<class 'int'>":  
+        cv2.namedWindow('Test_output',cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('Test_output', 600,600)
+        cv2.imshow("Test_output", predicted_img1)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 

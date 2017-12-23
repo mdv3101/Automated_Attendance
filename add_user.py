@@ -31,7 +31,7 @@ else:
     Batch = '20'+Year+'-20'+str(int(Year)+4)
 
 
-stud_folder_name= "user_"+Id
+stud_folder_name= "user_"+stud_no
 folderPath=os.path.join(os.path.dirname(os.path.realpath('__file__')),"student\\"+Dept+"\\"+Batch+"\\"+stud_folder_name)
 
 if not os.path.exists(folderPath):
